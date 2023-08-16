@@ -1,16 +1,24 @@
 import React, { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: true },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-];
+// const initialItems = [
+//   { id: 1, description: "Passports", quantity: 2, packed: true },
+//   { id: 2, description: "Socks", quantity: 12, packed: false },
+// ];
 
 function App() {
+  // const [items, setItem] = useState([]);
+  const [items, setItems] = useState([]);
+  function addItems(item) {
+    setItems((items) => [...items, item]);
+  }
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <Travelist />
+      <Form onAddIten={addItems} />
+      <Travelist handleDeleteItem={handleDeleteItem} items={items} />
       <Stats />
     </div>
   );
@@ -20,13 +28,25 @@ function Logo() {
   return <h1>🏝️Far Away 🎒</h1>;
 }
 
-function handleSubmit(event) {
-  event.preventDefault();
-}
-
-function Form() {
+function Form({ onAddIten }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuanity] = useState(1);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!description) return;
+    const newItem = {
+      description,
+      quantity,
+      packed: false,
+      id: Date.now(),
+    };
+    console.log(newItem);
+    onAddIten(newItem);
+    setDescription("");
+    setQuanity(1);
+  }
+
   return (
     <form onSubmit={handleSubmit} className="add-form">
       <h3>What will you need for your 😍 trip?</h3>
@@ -52,25 +72,25 @@ function Form() {
     </form>
   );
 }
-function Travelist() {
+function Travelist({ items, handleDeleteItem }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((list) => (
-          <Item list={list} key={list.id} />
+        {items.map((list) => (
+          <Item handleDeleteItem={handleDeleteItem} list={list} key={list.id} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ list }) {
+function Item({ list, handleDeleteItem }) {
   return (
     <li>
       <span style={list.packed ? { textDecorationLine: "line-through" } : {}}>
         {list.quantity} {list.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => handleDeleteItem(list.id)}>❌</button>
     </li>
   );
 }

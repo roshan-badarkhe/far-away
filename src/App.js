@@ -14,12 +14,25 @@ function App() {
   function handleDeleteItem(id) {
     setItems((items) => items.filter((item) => item.id !== id));
   }
+
+  function handleToggle(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddIten={addItems} />
-      <Travelist handleDeleteItem={handleDeleteItem} items={items} />
-      <Stats />
+      <Travelist
+        handleToggle={handleToggle}
+        handleDeleteItem={handleDeleteItem}
+        items={items}
+      />
+      <Stats items={items} />
     </div>
   );
 }
@@ -72,21 +85,31 @@ function Form({ onAddIten }) {
     </form>
   );
 }
-function Travelist({ items, handleDeleteItem }) {
+function Travelist({ items, handleDeleteItem, handleToggle }) {
   return (
     <div className="list">
       <ul>
         {items.map((list) => (
-          <Item handleDeleteItem={handleDeleteItem} list={list} key={list.id} />
+          <Item
+            handleToggle={handleToggle}
+            handleDeleteItem={handleDeleteItem}
+            list={list}
+            key={list.id}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ list, handleDeleteItem }) {
+function Item({ list, handleDeleteItem, handleToggle }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={list.packed}
+        onChange={() => handleToggle(list.id)}
+      />
       <span style={list.packed ? { textDecorationLine: "line-through" } : {}}>
         {list.quantity} {list.description}
       </span>
@@ -95,10 +118,27 @@ function Item({ list, handleDeleteItem }) {
   );
 }
 
-function Stats() {
+function Stats({ items }) {
+  if (!items.length) {
+    return (
+      <footer className="stats">
+        <em>Start Adding some items to your packing list</em>
+      </footer>
+    );
+  }
+  const itemLength = items.length;
+  const packed = items.filter((item) => item.packed).length;
+  const percent = parseInt((packed / itemLength) * 100);
   return (
     <footer className="stats">
-      <em>You Have X Items on your list, and you have already packed X(X%)</em>
+      {percent === 100 ? (
+        <em>You are Ready to go!!!!</em>
+      ) : (
+        <em>
+          You Have {itemLength} Items on your list, and you have already packed{" "}
+          {packed} ({percent}%)
+        </em>
+      )}
     </footer>
   );
 }
